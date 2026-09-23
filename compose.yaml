@@ -1,0 +1,35 @@
+services:
+  app:
+    build: .
+    restart: unless-stopped
+    ports:
+      - 127.0.0.1:${PORT:-3100}:3000
+    environment:
+      DATABASE_URL: mysql://change_request:${DB_PASSWORD:?}@db:3306/change_request
+      ACCESS_KEY: ${ACCESS_KEY:-}
+      ORIGIN: ${ORIGIN:?}
+      BODY_SIZE_LIMIT: 20M
+    volumes:
+      - images:/data
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: mysql:9.6
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: change_request
+      MYSQL_USER: change_request
+      MYSQL_PASSWORD: ${DB_PASSWORD:?}
+      MYSQL_RANDOM_ROOT_PASSWORD: "yes"
+    volumes:
+      - mysql:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "--silent"]
+      interval: 5s
+      retries: 30
+
+volumes:
+  images:
+  mysql:

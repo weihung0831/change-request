@@ -1,0 +1,58 @@
+name: CI/CD
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 25
+          cache: npm
+      - run: npm ci
+      - run: npm run check
+      - run: npm run build
+
+  deploy:
+    needs: check
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: [self-hosted, macmini]
+    concurrency:
+      group: deploy
+      cancel-in-progress: false
+    env:
+      PATH: /opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin
+    steps:
+      - name: Update code
+        run: |
+          cd "$HOME/Sites/change-request"
+          git fetch --quiet origin main
+          git reset --hard ${{ github.sha }}
+      - name: Build and restart
+        run: |
+          cd "$HOME/Sites/change-request"
+          docker compose up -d --build --remove-orphans
+          docker image prune -f
+      - name: Health check
+        run: |
+          cd "$HOME/Sites/change-request"
+          KEY=$(grep '^ACCESS_KEY=' .env | cut -d= -f2-)
+          echo "::add-mask::$KEY"
+          PORT=$(grep '^PORT=' .env | cut -d= -f2-)
+          for i in $(seq 1 60); do
+            code=$(curl -s -o /dev/null -w '%{http_code}' -b "access=$KEY" "http://127.0.0.1:${PORT:-3100}/" || true)
+            [ "$code" = 200 ] && echo "healthy" && exit 0
+            sleep 2
+          done
+          echo "last status: $code"
+          docker compose ps
+          docker compose logs --tail 50 app
+          exit 1

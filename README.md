@@ -30,29 +30,28 @@
 
 **設定檔**
 
-網站的設定寫在專案裡的 `.env` 檔。
-裡面有密碼，所以這個檔不會上傳到 GitHub。
+網站用 Docker 執行，網站和 MySQL 資料庫各跑在一個獨立的容器裡。
+容器的設定寫在 `compose.yaml`。
+
+密碼寫在專案裡的 `.env` 檔，這個檔不會上傳到 GitHub。
 每一行是一個設定，意思如下：
 
-- `DATABASE_URL`：連資料庫用的位址、帳號和密碼
-- `DATA_DIR`：截圖存在哪個資料夾，沒寫就存在 `data`
+- `DB_PASSWORD`：網站連資料庫用的密碼，自己訂一組
 - `ACCESS_KEY`：進網站要輸入的密碼，沒寫就不用密碼
 - `ORIGIN`：網站的正式網址
-- `HOST`、`PORT`：網站開在哪個位址和埠號
-- `BODY_SIZE_LIMIT`：一次最多能上傳多大的檔案
+- `PORT`：網站開在這台電腦的哪個埠號，沒寫就用 `3100`
 
 `ORIGIN` 一定要填對。
 填錯的話，按任何按鈕都會失敗。
 
+資料庫和截圖存在 Docker 的資料區，重開或更新網站都不會不見。
+
 **在自己電腦上試跑**
 
-先在 MySQL 開一個空的資料庫。
-把它寫進 `.env` 的 `DATABASE_URL`。
-接著跑這兩行：
+電腦要先裝好 Docker，寫好 `.env`，然後跑：
 
 ```bash
-npm install
-npm run dev
+docker compose up -d --build
 ```
 
 網站第一次連上資料庫，會自己把表格建好。
@@ -68,14 +67,12 @@ npm run dev
 
 **上線**
 
-在要放網站的電腦上，進到專案資料夾，跑這三行：
+推到 GitHub 的 `main` 之後，會自動檢查、打包、更新網站。
+流程寫在 `.github/workflows/ci.yml`。
+檢查沒過就不會更新網站。
+
+要手動上線的話，進到專案資料夾，跑同一行：
 
 ```bash
-npm ci
-npm run build
-npm start
+docker compose up -d --build
 ```
-
-三行分別是：裝套件、打包成正式版、啟動網站。
-啟動時會讀 `.env` 的設定。
-更新程式後，要重新打包、重新啟動才會生效。
