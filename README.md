@@ -76,3 +76,17 @@ docker compose up -d --build
 ```bash
 docker compose up -d --build
 ```
+
+**看紀錄**
+
+進到專案資料夾，跑這行：
+
+```bash
+docker compose logs -f app
+```
+
+每一行是一次操作：時間、來源 IP、做了什麼、結果代碼、花了多久。
+時間是國際標準時間，加 8 小時才是台灣時間。
+按 Ctrl+C 離開。
+
+紀錄最多留 30MB，超過會自動刪掉最舊的。

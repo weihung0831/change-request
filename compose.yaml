@@ -11,6 +11,11 @@ services:
       BODY_SIZE_LIMIT: 20M
     volumes:
       - images:/data
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
     depends_on:
       db:
         condition: service_healthy
@@ -25,6 +30,11 @@ services:
       MYSQL_RANDOM_ROOT_PASSWORD: "yes"
     volumes:
       - mysql:/var/lib/mysql
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "--silent"]
       interval: 5s
