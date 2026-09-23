@@ -10,22 +10,19 @@
 		"prepare": "svelte-kit sync || echo ''",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
-		"db:migrate": "wrangler d1 migrations apply DB --local",
-		"db:migrate:remote": "wrangler d1 migrations apply DB --remote",
-		"deploy": "npm run build && wrangler deploy"
+		"start": "node --env-file-if-exists=.env build"
 	},
 	"devDependencies": {
-		"@cloudflare/workers-types": "^5.20260908.1",
-		"@sveltejs/adapter-cloudflare": "^7.2.9",
+		"@sveltejs/adapter-node": "^5.5.7",
 		"@sveltejs/kit": "^2.63.0",
 		"@sveltejs/vite-plugin-svelte": "^7.1.2",
+		"@types/node": "^26.6.2",
 		"svelte": "^5.56.1",
 		"svelte-check": "^4.6.0",
 		"typescript": "^6.0.3",
-		"vite": "^8.0.16",
-		"wrangler": "^4.129.1"
+		"vite": "^8.0.16"
 	},
-	"allowScripts": {
-		"workerd@1.20260907.1": true
+	"dependencies": {
+		"mysql2": "^3.24.4"
 	}
 }

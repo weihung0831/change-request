@@ -3,9 +3,8 @@
 這是一個記下「系統哪裡要改」的網頁。
 網址：https://change-request.weihung.xyz
 
-它就像大家共用的一面便條牆。
-發現哪裡要改，就貼一張上去。
-工程師改好了，自己在那張上面打勾。
+發現系統哪裡要改，就在這裡新增一條。
+工程師改好了，自己打勾。
 
 **怎麼用**
 
@@ -25,47 +24,58 @@
 刪除會連截圖和歷程一起刪掉。
 刪了就救不回來，按之前想清楚。
 
-**資料放在哪裡**
+**以下給工程師**
 
-網站放在 Cloudflare 上，是一家提供雲端主機的公司。
-文字資料存在 D1，像雲端的記事本。
-截圖存在 R2，像雲端的相簿。
 程式用 SvelteKit 和 TypeScript 寫的。
 
-**給工程師：在自己電腦上跑**
+**設定檔**
+
+網站的設定寫在專案裡的 `.env` 檔。
+裡面有密碼，所以這個檔不會上傳到 GitHub。
+每一行是一個設定，意思如下：
+
+- `DATABASE_URL`：連資料庫用的位址、帳號和密碼
+- `DATA_DIR`：截圖存在哪個資料夾，沒寫就存在 `data`
+- `ACCESS_KEY`：進網站要輸入的密碼，沒寫就不用密碼
+- `ORIGIN`：網站的正式網址
+- `HOST`、`PORT`：網站開在哪個位址和埠號
+- `BODY_SIZE_LIMIT`：一次最多能上傳多大的檔案
+
+`ORIGIN` 一定要填對。
+填錯的話，按任何按鈕都會失敗。
+
+**在自己電腦上試跑**
+
+先在 MySQL 開一個空的資料庫。
+把它寫進 `.env` 的 `DATABASE_URL`。
+接著跑這兩行：
 
 ```bash
 npm install
-npm run db:migrate
 npm run dev
 ```
 
-本機沒設存取密碼，打開就能用。
-改完程式可以跑 `npm run check` 檢查型別。
+網站第一次連上資料庫，會自己把表格建好。
+改完程式，跑 `npm run check` 檢查有沒有寫錯。
 
-**給工程師：資料表要改欄位時**
+**資料表要加欄位時**
 
-在 `migrations/` 新增一個 SQL 檔，編號接著往下排。
-本機跑 `npm run db:migrate`。
-正式站跑 `npm run db:migrate:remote`。
+要改資料表的欄位，就在 `migrations/` 放一個新的 SQL 檔。
+檔名開頭的編號，接著上一個往下排。
 
-**給工程師：上線**
+網站啟動後，會自動照新檔案改資料表。
+改過哪些，記在 `migrations` 這張表裡，不會重複改。
 
-第一次上線，要先到 Cloudflare 後台啟用 R2。
-接著照順序跑這三行：
+**上線**
 
-```bash
-npx wrangler r2 bucket create change-request-images
-npm run db:migrate:remote
-npm run deploy
-```
-
-之後每次上線，只要跑 `npm run deploy`。
-網域設定在 `wrangler.jsonc` 的 `routes`。
-
-存取密碼用下面這行設定。
-沒設的話，任何人打開網址都能用。
+在要放網站的電腦上，進到專案資料夾，跑這三行：
 
 ```bash
-npx wrangler secret put ACCESS_KEY
+npm ci
+npm run build
+npm start
 ```
+
+三行分別是：裝套件、打包成正式版、啟動網站。
+啟動時會讀 `.env` 的設定。
+更新程式後，要重新打包、重新啟動才會生效。
