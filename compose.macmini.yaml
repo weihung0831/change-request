@@ -1,0 +1,16 @@
+services:
+  app:
+    environment:
+      DATABASE_URL: mysql://change_request:${DB_PASSWORD:?}@mysql:3306/change_request
+    depends_on: !reset {}
+    networks:
+      - default
+      - shared-db
+
+  db:
+    profiles:
+      - local-db
+
+networks:
+  shared-db:
+    external: true

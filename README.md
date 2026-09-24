@@ -46,6 +46,20 @@
 
 資料庫和截圖存在 Docker 的資料區，重開或更新網站都不會不見。
 
+**Mac mini 上的資料庫**
+
+Mac mini 上不跑專案自己的 MySQL，改連共用的那台。
+共用 MySQL 放在 Mac mini 的 `~/Sites/mysql`。
+切換靠 `compose.macmini.yaml`，它會關掉 `db`，改連 `mysql`。
+
+Mac mini 的 `.env` 要多一行，才會用到這個檔：
+
+```bash
+COMPOSE_FILE=compose.yaml:compose.macmini.yaml
+```
+
+在自己電腦上試跑不用加，照舊用專案自己的 MySQL。
+
 **在自己電腦上試跑**
 
 電腦要先裝好 Docker，寫好 `.env`，然後跑：
